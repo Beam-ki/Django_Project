@@ -3,12 +3,16 @@ from .models import UserModel
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model  # 사용자가 데이터 베이스안에있는지 검사하는 함수
 from django.contrib import auth
-
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def sign_up_view(request):
     if request.method == 'GET':
-        return render(request, 'user/signup.html')
+        user = request.user.is_authenticated
+        if user:
+            return redirect('/')
+        else:
+            return render(request, 'user/signup.html')
     elif request.method == 'POST':
         # me = UserModel.objects.get(username=username)
         username = request.POST.get('username', None)
@@ -38,5 +42,15 @@ def sign_in_view(request):
         else:
             return redirect('/sign-in')
     elif request.method == 'GET':
+        user = request.user.is_authenticated
+        if user:
+            return  redirect('/')
+        else:
+            return render(request, 'user/signin.html')
 
-        return render(request, 'user/signin.html')
+
+@login_required()
+def logout(request):
+    auth.logout(request)
+    return  redirect('/')
+
